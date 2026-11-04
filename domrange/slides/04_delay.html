@@ -1,0 +1,139 @@
+
+<section>
+  <h2>Delay: No Shape Exposure</h2>
+  <div style="margin-top: 2%;">
+  <b>Our rule types the application $f(x)$ with $f : F$, never exposing the arrow shape.</b>
+  </div>
+  <div class="rules2" style="justify-content: flex-start; gap: 2.7em; padding-left: 1%;">
+    <div>
+      $\inferfrac{\inferfrac{f : F}{f : \chl{\TDom{F} \to \TRange{F}}}\ \eta \qquad x : \cTDom{F}}{f(x) : \cTRange{F}}$
+      <span class="rulename">type destructors</span>
+    </div>
+    <div>
+      $\inferfrac{f : F \qquad x : \cTDom{F}}{f(x) : \cTRange{F}}$
+      <span class="rulename">ours</span>
+    </div>
+  </div>
+  <div style="margin-top: 3.5%;">
+  <b>Type destructors first cast $f$ to an arrow, which needs an arrow bound.</b>
+  <span class="gloss">Hofmann and Pierce, I&amp;C 2002, who only named the destructors for arrows</span>
+  </div>
+</section>
+
+<section>
+  <h2>Delay: No Reconstruction</h2>
+  <div style="margin-top: 2%;">
+  <b>The converse cast reconstructs $F$, as TypeScript code does with <code class="hl2 language-typescript">as F</code>:</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  const logDecorator = &lt;F extends (...args: any) =&gt; any&gt;(fn: F) =&gt;
+    ((...args: Parameters&lt;F&gt;) =&gt; fn(...args)) [h[as F]];
+  const taggedInc = Object.assign((x: number) =&gt; x + 1, { tag: "inc" });
+  logDecorator(taggedInc)[h[.tag]].toUpperCase()   // type-checks, !!throws at run time!!
+  </code></pre>
+  <div style="margin-top: 2.5%;">
+  <b>The cast is unsound once a function type describes more than its calls.</b>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3.5%;">
+  <b>Delay needs neither cast, so the wrapper keeps its type $\cTDom{F} \to \cTRange{F}$:</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  logDecorator(taggedInc)[h[.tag]].toUpperCase()   // !!error:!! the wrapper has no field tag
+  </code></pre>
+  </div>
+</section>
+
+<section>
+  <h2>Delay: The Argument Witnesses the Arrow</h2>
+  <div style="margin-top: 2%;">
+  <b>$\cTDom{F}$ can only reduce to an inhabited type if $F$ is an arrow type:</b>
+  </div>
+  <div style="margin-top: 4%;">
+    <div class="panel">
+      <p class="kw-group">an arrow</p>
+      <div class="disp" style="margin-top: 1%;">$\cTDom{\TInt \to \TBool} \equiv \TInt$</div>
+      <div class="centering" style="margin-top: 2%;"><b>has values, such as $42$</b></div>
+    </div>
+    <div class="panel">
+      <p class="kw-group">other types</p>
+      <div class="disp" style="margin-top: 1%;">$\cTDom{\TInt} \qquad \cTDom{\TTop}$</div>
+      <div class="centering" style="margin-top: 2%;"><b>do not reduce, and have no values</b></div>
+    </div>
+  </div>
+  <div class="fragment" data-fragment-index="1" style="margin-top: 4%;">
+  <b>So $x : \cTDom{F}$ certifies the arrow at the call.</b>
+  <div style="margin-top: 2%;">
+  <b>Call-by-value evaluates the argument first:</b>
+  </div>
+  <div class="disp" style="margin-top: 2%;">
+  $f(e) \longrightarrow^* f(\chl{v}) \qquad v : \cTDom{F}$
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Delay Is Unique to Contravariance</h2>
+  <div style="margin-top: 2%;">
+  <b>Projections follow the variance of their type:</b>
+  </div>
+  <div style="margin-top: 4.5%;">
+    <div class="panel">
+      <p class="kw-group">function</p>
+      <div class="centering">$F &lt;: A \to B \;\Rightarrow\; A &lt;: \cTDom{F}$</div>
+      <div style="margin-top: 2.5%;"><b>$v : \cTDom{F}$ only if $F$ is below an arrow</b></div>
+    </div>
+    <div class="panel">
+      <p class="kw-group">pair</p>
+      <div class="centering">$A \times B &lt;: P \;\Rightarrow\; A &lt;: \TFst{P}$</div>
+      <div style="margin-top: 2.5%;"><b>$v : \TFst{P}$ even if $P$ is $\TTop$</b></div>
+    </div>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 6%;">
+  <b>So only a contravariant projection can wait for a witness from outside:</b>
+  </div>
+  <div style="margin-top: 4%;">
+    <div class="panel">
+      <div class="centering">$\Lambda F &lt;: \TTop.\ \lambda f : F.\ \lambda \chl{x} : \cTDom{F}.\ f(x)$</div>
+      <div style="margin-top: 2.5%;"><b>witness from outside: $\chl{x}$ at the call</b></div>
+    </div>
+    <div class="panel">
+      <div class="centering">$\Lambda X &lt;: \chl{\TTop \times \TTop}.\ \lambda p : X.\ p.1 \;:\; \TFst{X}$</div>
+      <div style="margin-top: 2.5%;"><b>witness from inside: only the bound</b></div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Boundless Quantification</h2>
+  <div style="margin-top: 2%;">
+  <b>The two ingredients take over both roles of an arrow bound $F &lt;: A \to B$.</b>
+  </div>
+  <table class="goal-list fixed" style="margin-top: 2.5%; font-size: 100%; width: 100%;">
+    <tr>
+      <td style="width: 18%;"><b>types $A$, $B$</b></td>
+      <td style="width: 17%;"><b>Projection</b></td>
+      <td><b>$\cTDom{F}$ and $\cTRange{F}$ name them</b></td>
+    </tr>
+    <tr>
+      <td><b>shape $\to$</b></td>
+      <td><b>Delay</b></td>
+      <td><b>the argument witnesses it at the call</b></td>
+    </tr>
+  </table>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3.5%;">
+  <b>So $F$ needs no meaningful bound, and the proposed rule types $\textit{eta}$:</b>
+  </div>
+  <div class="disp" style="margin-top: 2%;">
+  $\textit{eta} \;:=\; \Lambda F &lt;: \chl{\TTop}.\ \lambda f : F.\ \lambda x : \cTDom{F}.\ f(x)$
+  </div>
+  <div class="disp" style="margin-top: 2.5%;">
+  $\inferfrac{\inferfrac{f : F \qquad x : \cTDom{F}}{f(x) : \cTRange{F}}\ \rulefmt{T-App-DR}}{\textit{eta} \;:\; \forall F &lt;: \TTop.\ F \to \cTDom{F} \to \cTRange{F}}\ \rulefmt{T-TAbs}$
+  </div>
+  <div class="centering gloss" style="margin-top: 2%;">at $\TInt \to \TBool$, the projections eliminate, and $\textit{eta}$ has the type $(\TInt \to \TBool) \to \TInt \to \TBool$</div>
+  </div>
+</section>
+

@@ -1,0 +1,56 @@
+
+<section>
+  <h2>Beyond Types: Relative Effects</h2>
+  <div style="margin-top: 2%;">
+  <b>The same delay resolves the latent effect of a function at the call.</b>
+  </div>
+  <pre style="margin-top: 3%;"><code data-trim>
+  def trace[A, B, E](f: A -&gt; B | E, x: A): B | io ▷ E     = { log(x); f(x) }
+  def trace[F](f: F, x: Dom(F)): Range(F) | io ▷ [h[Eff(F)]]  = { log(x); f(x) }
+  </code></pre>
+  <div class="fragment" data-fragment-index="1">
+  <div class="disp" style="margin-top: 3%;">
+  $\cTEff{A \to B \mid e} \equiv e \qquad\quad
+   \inferfrac{f : F \mid e_1 \qquad x : \cTDom{F} \mid e_2}{f(x) : \cTRange{F} \mid e_1 \rhd e_2 \rhd \chl{\cTEff{F}}}$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>$\cTEff{F}$ is covariant, like $\cTRange{F}$, so its delay is the easier one.</b>
+  </div>
+  <div style="margin-top: 2%;">
+  <b>The relative effect <code class="hl2">pure(f)</code>, pure except for calling <code class="hl2">f</code>, is then just $\cTEff{F}$.</b>
+  <span class="gloss">Rytz, Odersky and Haller, ECOOP'12; the formal development is future work</span>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>An Idea: Inference by Delay</h2>
+  <div style="margin-top: 2%;">
+  <b>Delay never splits $F$, so inference could keep it whole.</b>
+  </div>
+  <div style="margin-top: 3.5%;">
+  <b>Example: calling $\textit{eta}(\textit{inc})(1)$, with $\textit{inc} : \TInt \to \TInt$:</b>
+  <span class="gloss">local inference solves as few constraints as it can and checks the rest (Pierce and Turner, TOPLAS 2000)</span>
+  </div>
+  <table class="goal-list fixed" style="margin-top: 2.5%; font-size: 100%; width: 100%;">
+    <tr>
+      <td style="width: 38%; color: #555;">type of $\textit{eta}$</td>
+      <td style="width: 38%; color: #555;">solve</td>
+      <td style="color: #555;">check</td>
+    </tr>
+    <tr>
+      <td>$\forall A, B.\ (A \to B) \to A \to B$</td>
+      <td>$\TInt \to \TInt &lt;: A \to B \qquad \TInt &lt;: A$</td>
+      <td style="color: #999;">nothing</td>
+    </tr>
+    <tr>
+      <td>$\forall F.\ F \to \cTDom{F} \to \cTRange{F}$</td>
+      <td>$\TInt \to \TInt &lt;: F$</td>
+      <td>$\TInt &lt;: \cTDom{F}$</td>
+    </tr>
+  </table>
+  <div class="fragment" data-fragment-index="1" style="margin-top: 4%;">
+  <b>So local inference solves only the constraint from $\textit{inc}$, and checks $1$ against $\cTDom{F}$.</b>
+  <span class="gloss">open: constraints between projections, as in $f(f(x))$, principal types, and overloads typed by intersections</span>
+  </div>
+</section>

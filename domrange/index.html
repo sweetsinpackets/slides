@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <title>Let Functions Speak @ MWPLS 2026</title>
+
+  <link rel="stylesheet" href="dist/reset.css" />
+  <link rel="stylesheet" href="dist/reveal.css" />
+  <link rel="stylesheet" href="dist/theme/white.css" />
+
+  <!-- Theme used for syntax highlighted code -->
+  <link rel="stylesheet" href="dist/plugin/highlight/stackoverflow-light.css" />
+  <link rel="stylesheet" href="dist/custom/style.css" />
+</head>
+
+<body>
+  <script>
+  // Point these at ./node_modules/... to run fully offline (`npm install` first).
+  const localPaths = {
+    // mathjax: './node_modules/mathjax/tex-chtml.js',
+    // mathjaxFont: './node_modules/@mathjax/mathjax-newcm-font',
+    // mermaid: './node_modules/mermaid/dist/mermaid.esm.min.mjs',
+    // mermaidElk: './node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs',
+    // chartjs: './node_modules/chart.js/dist/chart.umd.min.js',
+  }
+  window.charts = {};
+  </script>
+  <div class="reveal">
+    <div class="slides" data-include="slides/main.html"></div>
+  </div>
+
+  <script src="dist/reveal.js"></script>
+  <script src="dist/plugin/markdown.js"></script>
+  <script src="dist/plugin/notes.js"></script>
+  <script src="dist/plugin/math.js"></script>
+  <script src="dist/plugin/zoom.js"></script>
+  <script src="dist/plugin/highlight.js"></script>
+  <script src="dist/custom/reachability.js"></script>
+  <script src="dist/custom/reveal-includes.js"></script>
+  <script src="dist/custom/reveal-toc.js"></script>
+  <script src="dist/custom/reveal-mermaid.js"></script>
+  <script src="dist/custom/reveal-chartjs.js"></script>
+
+  <script>
+  // ===== Math / equations =====
+  // https://docs.mathjax.org/en/v4.0/input/tex/index.html
+
+  const mathjaxOptions = {
+    mathjax: localPaths.mathjax,
+    output: {
+      scale: 0.8,
+      fontPath: localPaths.mathjaxFont
+    },
+    // $tex$ spans captured inside code blocks carry this class; without it,
+    // MathJax's skipHtmlTags (pre, code) silently drops them.
+    options: { processHtmlClass: 'mathjax_process' },
+    startup: { pageReady: typesetCollectedMath },
+    tex:     { macros: {
+      // --- colors ---
+      // projection pink: Dom/Range, the paper's new types (same #B23473 as
+      // the qualifier pink of the reachability decks)
+      // projections, the arrow shape and selection paths were coloured
+      // text (pink, orange, teal) until 2026-11-02; one rule now holds for
+      // the whole deck: text is black, emphasis is the \\chl highlight
+      cpj:      "",
+      // selection paths in the logical relation (teal, apart from the pink)
+      cpath:    "",
+      cer:      "\\color{red}",
+      // the highlight (the arena paper's \\arenacontent pink), as [h[..]] in
+      // code; styled by .hl in style.css, a box-shadow that does not move the math
+      chl:      ["{\\class{hl}{#1}}", 1],
+      // the arrow shape a bound certifies (orange, as the .ring frame)
+      csh:      "",
+      // emphasis frames (MWPLS pass, 2026-10-29). The frame takes the
+      // current colour (a CSS border without a colour), and the content is
+      // reset to black: pink frames the types a bound names (projection),
+      // orange the arrow shape it certifies (delay), red an error, blue and
+      // green a neutral pairing of term and type.
+      bxp:      ["{\\cpj\\bbox[5px,border:3px solid]{\\color{black}{#1}}}", 1],
+      bxo:      ["{\\color[RGB]{194,94,0}\\bbox[5px,border:3px solid]{\\color{black}{#1}}}", 1],
+      bxr:      ["{\\color[RGB]{198,40,40}\\bbox[5px,border:3px solid]{\\color{black}{#1}}}", 1],
+      bxb:      ["{\\color[RGB]{31,78,140}\\bbox[5px,border:3px solid]{\\color{black}{#1}}}", 1],
+      bxg:      ["{\\color[RGB]{46,125,79}\\bbox[5px,border:3px solid]{\\color{black}{#1}}}", 1],
+      cdm:      "\\color{gray}",
+      rulefmt:  ["\\textsf{(#1)}", 1],
+      // inference rule (user, 2026-11-02): every judgment gets the same
+      // strut, so each rule line has equal, moderate space above and below
+      // (measured 13-14 px at the screenshot scale); use it for every
+      // derivation instead of \dfrac
+      inferfrac: ["\\dfrac{\\rule[-0.4em]{0pt}{1.3em}#1}{\\rule[-0.4em]{0pt}{1.3em}#2}", 2],
+
+      // --- the calculi ---
+      Fsub:     "{\\sf F}_{<:}",
+      domranlang: "{\\sf F}^{\\sf DR}_{<:}",
+
+      // --- types (macros/domrange_macros.tex of the paper) ---
+      Type:     ["\\textsf{#1}", 1],
+      TTop:     "\\textsf{Top}",
+      TBot:     "\\textsf{Bot}",
+      TInt:     "\\textsf{Int}",
+      TBool:    "\\textsf{Bool}",
+      TStr:     "\\textsf{String}",
+      TDom:     ["\\textsf{Dom}(#1)", 1],
+      TRange:   ["\\textsf{Range}(#1)", 1],
+      cTDom:    ["{\\cpj\\textsf{Dom}(#1)}", 1],
+      cTRange:  ["{\\cpj\\textsf{Range}(#1)}", 1],
+      TFun:     ["#1 \\to #2", 2],
+      TAll:     ["\\forall #1 <: #2.\\, #3", 3],
+      TPair:    ["#1 \\times #2", 2],
+      TFst:     ["\\textsf{Fst}(#1)", 1],
+      TSnd:     ["\\textsf{Snd}(#1)", 1],
+      TList:    ["\\textsf{List}\\,#1", 1],
+      // extensions: effect projection, image types (wip-image)
+      TEff:     ["\\textsf{Eff}(#1)", 1],
+      cTEff:    ["{\\cpj\\textsf{Eff}(#1)}", 1],
+      cTImg:    ["{\\cpj{#1} \\mathbin{@} {#2}}", 2],
+
+      // --- judgments ---
+      G:        "\\Gamma",
+      ts:       "\\vdash",
+      mts:      "\\models",
+      defeq:    "\\overset{\\textsf{def}}{=}",
+      ev:       "\\Downarrow",
+
+      // --- logical relation (path selection) ---
+      bbrkt:    ["⟦{#1}⟧", 1],
+      Vint:     ["\\mathbb{V}\\bbrkt{#1}^{\\,{\\cpath #2}}", 2],
+      slroot:   "{\\cpath\\bullet}",
+      sldom:    "{\\cpath\\textsf{dom}}",
+      slran:    "{\\cpath\\textsf{ran}}",
+      LF:       ["\\textsf{LF}(#1)", 1],
+    }},
+  };
+
+  // ===== Code highlighting =====
+  // https://highlightjs.readthedocs.io/en/latest/api.html
+  //
+  // Source notation cheat sheet for <code> blocks:
+  //   $x^2$        inline TeX, typeset by MathJax
+  //   ~{q}         superscript
+  //   !!red!!      red span: errors only (a type error, a crash, a stuck term)
+  //   [h[any]]     the highlight: yellow background, text keeps its colour
+  //   ??..??       projections, uncoloured since 2026-11-02 (use [h[..]] to point at one)
+  //   `dimmed`     gray span
+  //   ^^teal^^     teal span (spare accent)
+  //   [[boxed]]    blue frame around a span (focus)
+  //   [!boxed!]    red frame around a span (the failing part)
+  //   [v[fn]]      pale blue tint: a function passed as a value (the tints
+  //                are unused since 2026-11-02: highlights are red, !!..!!)
+  //   [a[fn(x)]]   pale orange tint: a function applied (needs an arrow)
+  //   [t[(x: A) => B]] pale pink tint: input and output types
+  //   [p[console.log(..)]] plain: no syntax colours, for incidental code
+  //   (syntax colours: keywords and comments only, see style.css)
+  //   |- |-> -> ==> \u \E \A <<   symbol translations
+
+  // A span with a class, for the frames above (styled in style.css).
+  const makeClassSpan = (cls) => (text) => {
+    const span = document.createElement('span');
+    span.className = cls;
+    span.textContent = text;
+    return span;
+  };
+
+  const highlightOptions = {
+    beforeHighlight(hljs) {
+      hljs.registerLanguage("rt", rtLangDef);
+      hljs.configure({ languages: ["rt"] });
+      hljs.addPlugin(createHighlightAnnotationPlugin([
+        // innermost-first: math escape first
+        { regex: /\$([^$]+)\$/g,   apply: captureMathSpan },         // $tex$ inline math via MathJax
+        // direct symbol translations
+        { translations: {
+          '|->': '↦',
+        }},
+        { translations: {
+            '|-':  '⊢',
+            '==>': '⟹',
+            '->':  '→',
+            '~*':  '♦',
+            '~0':  '∅',
+            '\\u': 'μ',
+            '\\E': '∃',
+            '\\A': '∀',
+            '<<':  '≪',
+        }},
+        // scripting
+        { regex: /~\{([^\}]+)\}/g, apply: makeSup },                 // ~{superscript}
+        // `extends` in a type parameter list is a keyword; highlight.js's
+        // TypeScript grammar takes it for the function name there
+        { regex: /(?<=<[A-Z]\w* )extends(?= )/g, apply: makeClassSpan('hljs-keyword') },
+        // an arrow, a subtyping sign or a typing colon in inline code
+        // (Bot → Top, Bool <: Dom(F), f : F) takes the text font: in Cascadia
+        // they float between wide monospace spaces (styled for code.hl2 only)
+        { regex: / ?(?:→|<:) ?| : /g, apply: makeClassSpan('arr') },
+        // colors
+        { regex: /!!(.+?)!!/g,     apply: makeColorSpan('red') },    // !!Red Error!!
+        { regex: /\?\?(.+?)\?\?/g, apply: makeClassSpan('plain') },  // ??projection?? (now uncoloured)
+        { regex: /`([^`]+)`/g,     apply: makeColorSpan('gray') },   // `dimmed`
+        { regex: /\^\^(.+?)\^\^/g, apply: makeColorSpan('#0f766e') }, // ^^teal^^
+        // frames last, so they can enclose coloured spans
+        { regex: /\[\[(.+?)\]\]/g, apply: makeClassSpan('cbox') },   // [[blue frame]]
+        { regex: /\[!(.+?)!\]/g,     apply: makeClassSpan('ebox') },   // [!red frame!]
+        { regex: /\[v\[(.+?)\]\]/g,   apply: makeClassSpan('mv') },     // [v[passed as a value]]
+        { regex: /\[a\[(.+?)\]\]/g,   apply: makeClassSpan('ma') },     // [a[applied]]
+        { regex: /\[t\[(.+?)\]\]/g,   apply: makeClassSpan('mt') },     // [t[input and output types]]
+        { regex: /\[h\[(.+?)\]\]/g,   apply: makeClassSpan('hl') },     // [h[the highlight]]
+        { regex: /\[p\[(.+?)\]\]/g,   apply: makeClassSpan('plain') },  // [p[incidental code, uncoloured]]
+      ]));
+    }
+  }
+
+  // ===== Reveal options =====
+  // https://revealjs.com/initialization/
+  // https://revealjs.com/config/
+
+  Reveal.initialize({
+    //view: "scroll",
+    hash: true,
+    controls: false,
+    slideNumber: "c/t",
+    navigationMode: "linear",
+    width: 1536,
+    height: 960,
+    showNotes: false,
+    center: false,
+    margin: 0.2,
+    transition: "fade",
+    // MWPLS: a 20-minute slot including questions, so 17 minutes of talk
+    totalTime: 1020,
+
+    highlight: highlightOptions,
+    mathjax4:  mathjaxOptions,
+    mermaid: {
+      theme: 'neutral',
+      look: 'handDrawn',
+      themeVariables: {
+        fontSize: '16px',
+      },
+      path: localPaths.mermaid,
+      elkPath: localPaths.mermaidElk,
+    },
+    chartjs: {
+      path: localPaths.chartjs,
+      default: {
+        font: { size: 32 },
+        elements: {
+          point: {
+            borderWidth: 3,
+            radius: 5
+          }
+        }
+      },
+      charts: window.charts
+    },
+
+    plugins: [
+      RevealIncludes,
+      RevealToc,
+      RevealHighlight,
+      RevealNotes,
+      RevealZoom,
+      RevealMath.MathJax4,
+      RevealMermaid,
+      RevealChartjs,
+    ],
+  }).then(() => {
+    highlightExtras('code.hl2');
+
+    // "v" switches between the normal deck (arrow keys, one slide at a time)
+    // and the scroll view (mouse wheel, one long page). Reveal only reads
+    // `view` when it initializes, so flip the query param and reload; with
+    // hash: true we land back on the slide we were looking at.
+    Reveal.addKeyBinding(
+      { keyCode: 86, key: 'V', description: 'Toggle scroll / deck view' },
+      () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('view') === 'scroll') url.searchParams.delete('view');
+        else url.searchParams.set('view', 'scroll');
+        window.location.href = url.toString();
+      }
+    );
+  });
+  </script>
+</body>
+
+</html>

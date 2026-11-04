@@ -1,8 +1,11 @@
-# OOPSLA 2026 slides
+# Slides
 
 Talk slides and a poster, served by GitHub Pages at
-<https://sweetsinpackets.github.io/oopsla26-slides/>.
+<https://sweetsinpackets.github.io/slides/>.
 
+- **Let Functions Speak: Lightweight Parametric Polymorphism via Domain and
+  Range Types** (MWPLS 2026): slides in `domrange/`,
+  [preprint](https://arxiv.org/abs/2603.23360).
 - **When Lifetimes Liberate: A Type System for Arenas with Higher-Order
   Reachability Tracking** (OOPSLA 2026): slides in `arena/`, poster in
   `poster/poster.pdf`, [paper](https://doi.org/10.1145/3798254).

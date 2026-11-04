@@ -1,0 +1,58 @@
+
+<section>
+  <h2>Projection: Domain and Range Types</h2>
+  <div style="margin-top: 2%;">
+  <b>$\cTDom{F}$ and $\cTRange{F}$ are first-class types.</b>
+  </div>
+  <div style="margin-top: 3%;">
+  <b>On a known arrow type, they eliminate:</b>
+  </div>
+  <div class="disp" style="margin-top: 1.5%;">
+  $\cTDom{A \to B} \equiv A \qquad\qquad \cTRange{A \to B} \equiv B$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>$\cTDom{\TInt}$ is well-defined too, but does not eliminate.</b>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>With arrow variance, $F &lt;: A \to B$ gives:</b>
+  </div>
+  <div class="disp" style="margin-top: 1.5%;">
+  $\chl{A \equiv \cTDom{A \to B} &lt;: \cTDom{F}} \qquad \cTRange{F} &lt;: \cTRange{A \to B} \equiv B$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>An upper bound on $F$ gives its domain a lower bound.</b>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>More Than Type Parameters</h2>
+  <div style="margin-top: 2%;">
+  <b>$\cTDom{F}$ and $\cTRange{F}$ cannot simply be replaced by type parameters $A$ and $B$.</b>
+  </div>
+  <div style="margin-top: 4%;">
+    <div class="panel">
+      <div class="disp" style="margin-top: 0;">$T &lt;: \cTDom{F}$</div>
+      <div class="centering" style="margin-top: 2%;"><b>a lower bound, by contravariance</b></div>
+    </div>
+    <div class="panel">
+      <div class="disp" style="margin-top: 0;">$\forall X &lt;: T.\ \ldots$</div>
+      <div class="centering" style="margin-top: 2%;"><b>F<sub>&lt;:</sub> has upper bounds only</b></div>
+    </div>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 4%;">
+  <b>So we can construct programs that F<sub>&lt;:</sub> cannot type:</b>
+  </div>
+  <div class="disp" style="margin-top: 1.5%;">
+  $g \;:=\; \Lambda F &lt;: \TBool \to \TBool.\ \lambda f : F.\ \lambda h : \chl{\cTRange{F} \to \cTDom{F}}.\ f(h(f(\textsf{true})))$
+  </div>
+  <div style="margin-top: 3.5%;">
+  <b>F<sub>&lt;:</sub> splits $F$ into $A$ and $B$ to type $h$, but then $\textsf{true}$ needs the underivable $\TBool &lt;: A$:</b>
+  </div>
+  <div class="disp" style="margin-top: 1.5%;">
+  $g' \;:=\; \Lambda A &lt;: \TTop.\ \Lambda B &lt;: \TBool.\ \lambda f : A \to B.\ \lambda h : \chl{B \to A}.\ f(h(f({\cer \textsf{true}})))$
+  </div>
+  </div>
+</section>

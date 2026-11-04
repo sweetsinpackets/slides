@@ -1,0 +1,87 @@
+
+<section>
+  <h2>Root Cause: Application Asks for an Arrow</h2>
+  <div style="margin-top: 2%;">
+  <b>The standard application rule can apply $f$ only when its type is an arrow.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%;">
+  $\inferfrac{f : \chl{A \to B} \qquad x : A}{f(x) : B}\ \ \rulefmt{T-App}$
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>An abstract $F$ stays abstract at the definition: its future instantiations are unknown.</b>
+  </div>
+  <table class="goal-list fixed" style="margin-top: 3.5%; font-size: 100%;">
+    <tr>
+      <td style="width: 21%;"><b>early exposure</b></td>
+      <td style="width: 54%;"><b>upcast $f$ to its bound $\TBot \to \TTop$</b></td>
+      <td>imprecise</td>
+    </tr>
+    <tr>
+      <td><b>utility types</b></td>
+      <td><b>read the parts off $F$, relying on <code class="hl2">any</code></b></td>
+      <td>unsound</td>
+    </tr>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>This Work</h2>
+  <div style="margin-top: 2%;">
+  <b>An alternative view from mathematics: a function maps its domain to its range.</b>
+  </div>
+  <div class="disp" style="margin-top: 2%;">
+  $x \in \mathrm{dom}(f) \;\Longrightarrow\; f(x) \in \mathrm{ran}(f)$
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>This work proposes a refined application rule for lightweight polymorphism.</b>
+  </div>
+  <div class="rules2 near">
+    <div style="color: #999;">
+      $\inferfrac{f : A \to B \qquad x : A}{f(x) : B}$
+      <span class="rulename">standard</span>
+    </div>
+    <div>
+      $\inferfrac{f : F \qquad x : \cTDom{F}}{f(x) : \cTRange{F}}$
+      <span class="rulename">proposed</span>
+    </div>
+  </div>
+  </div>
+  <div class="fragment" data-fragment-index="2">
+  <div style="margin-top: 3%;">
+  <b>The η-expansion then gets the precise type, without exposing the shape of $F$.</b>
+  </div>
+  <div class="disp" style="margin-top: 2%;">
+  $\textit{eta} \;:\; \forall F &lt;: \TTop.\ F \to \chl{\cTDom{F}} \to \chl{\cTRange{F}}$
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Two Ingredients: Projection and Delay</h2>
+  <div style="margin-top: 2%;">
+  <b>Compared with the standard rule, the proposed rule has two ingredients.</b>
+  </div>
+  <div class="rules2 near">
+    <div style="color: #999;">
+      $\inferfrac{f : A \to B \qquad x : A}{f(x) : B}$
+      <span class="rulename">standard</span>
+    </div>
+    <div>
+      $\inferfrac{f : F \qquad x : \chl{\cTDom{F}}}{f(x) : \chl{\cTRange{F}}}$
+      <span class="rulename">proposed</span>
+    </div>
+  </div>
+  <table class="goal-list fixed fragment" data-fragment-index="1" style="margin-top: 3%; font-size: 100%; width: 100%;">
+    <tr>
+      <td style="width: 18%;"><b>Projection</b></td>
+      <td><b>projection types for the domain and range of an abstract $F$</b></td>
+    </tr>
+    <tr>
+      <td><b>Delay</b></td>
+      <td><b>the obligation that $F$ is an arrow is not enforced by an arrow type</b></td>
+    </tr>
+  </table>
+</section>

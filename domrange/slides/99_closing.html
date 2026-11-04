@@ -1,0 +1,247 @@
+<section>
+  <h2>Conclusion</h2>
+  <div class="concl-flow">
+    <div>Projection</div><div class="cf-to">→</div><div>expressiveness beyond F<sub>&lt;:</sub></div><div class="cf-rule"></div>
+    <div class="cf-join"></div>
+    <div class="cf-goal"><span class="hl">Boundless quantification</span></div>
+    <div>Delay</div><div class="cf-to">→</div><div>no shape exposure, no reconstruction</div><div class="cf-rule"></div>
+  </div>
+  <div style="margin-top: 6%;">
+  <b>Soundness is mechanized in Rocq, with a logical relation and a syntactic proof.</b>
+  </div>
+  <div style="margin-top: 4%; display: flex; align-items: center; gap: 3.5%;">
+    <img src="assets/qr-paper.svg" alt="QR code: arxiv.org/abs/2603.23360" style="width: 13%; margin: 0;">
+    <div>
+      <div>Preprint on arXiv, revised version soon</div>
+      <div class="smaller" style="color: #555;"><code>arxiv.org/abs/2603.23360</code></div>
+      <div style="margin-top: 5%;">
+        <span class="newtag" style="font-size: 100%; color: #222;">I am seeking academic and industry positions.</span>
+      </div>
+    </div>
+  </div>
+  <div class="refs centering" style="width: 100%;">
+    Thank you. Questions?
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Soundness by Logical Relations</h2>
+  <div style="margin-top: 2%;">
+  <b>The semantics delays $\cTDom{T}$ until $T$ resolves to an arrow, as the typing does.</b>
+  </div>
+  <table class="goal-list" style="margin-top: 3%; font-size: 100%;">
+    <tr>
+      <td style="width: 18%;"><b>delay</b></td>
+      <td>$\Vint{\cTDom{T}}{s} = \Vint{T}{s.\sldom} \qquad \Vint{\cTRange{T}}{s} = \Vint{T}{s.\slran}$</td>
+    </tr>
+    <tr>
+      <td><b>resolve</b></td>
+      <td>$\Vint{T_1 \to T_2}{s.\sldom} = \Vint{T_1}{s} \qquad\ \ \, \Vint{T_1 \to T_2}{s.\slran} = \Vint{T_2}{s}$</td>
+    </tr>
+  </table>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 2.5%;">
+  <b>A ${\cpath\textsf{dom}}$ step flips polarity, as the domain of an arrow does.</b>
+  </div>
+  <div style="margin-top: 2%;">
+  <b>$\LF{V}$: if the domain of $V$ has a value, every value of $V$ is a function.</b>
+  <span class="gloss">the witness property as a semantic invariant, required of every type variable's interpretation</span>
+  </div>
+  </div>
+  <div class="fragment" data-fragment-index="2" style="margin-top: 4%;">
+  <b>Semantic type soundness and weak normalization, mechanized in Rocq.</b>
+  <span class="gloss">every F&lt;: program stays typeable; the development also covers product projections and higher kinds</span>
+  </div>
+  <p class="refs">Path selection after the bound selectors of Wang and Rompf, ECOOP'17.</p>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Why a Value Is a Witness</h2>
+  <div style="margin-top: 2%;">
+  <b>A subtyping derivation can end at $\cTDom{F}$ in only three ways.</b>
+  </div>
+  <table class="goal-list fixed" style="margin-top: 3%; font-size: 100%;">
+    <tr>
+      <td style="width: 20%;"><b>introduction</b></td>
+      <td style="width: 34%;">$A &lt;: \cTDom{A \to B}$</td>
+      <td>the projected type is an arrow</td>
+    </tr>
+    <tr>
+      <td><b>congruence</b></td>
+      <td>$\inferfrac{F &lt;: S}{\cTDom{S} &lt;: \cTDom{F}}$</td>
+      <td><b>move up to a supertype of $F$</b></td>
+    </tr>
+    <tr>
+      <td><b>bottom</b></td>
+      <td>$\TBot &lt;: \cTDom{F}$</td>
+      <td><b>no value has type $\TBot$</b></td>
+    </tr>
+  </table>
+  <div class="fragment" data-fragment-index="1" style="margin-top: 3.5%;">
+  <b>So $F &lt;: A \to B$ for some arrow, and every $f : F$ is a function.</b>
+  <span class="gloss">F = Bot: Dom(Bot) &equiv; Top is inhabited, but no f : Bot exists; the proof is mechanized</span>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Why Call-by-Value</h2>
+  <div style="margin-top: 2%;">
+  <b>The argument is the witness, so it must be a value before the call reduces.</b>
+  </div>
+  <pre style="margin-top: 3%;"><code data-trim>
+  val etaErr = eta[Int](42)   //: Dom(Int) -&gt; Range(Int)
+  def loop(): Bot = loop()    // loop() : Bot &lt;: Dom(Int)
+  etaErr(loop())
+  </code></pre>
+  <table class="goal-list" style="margin-top: 2%;">
+    <tr><td><b>call-by-value</b></td><td><code class="hl2">loop()</code> runs first and diverges; <code class="hl2">42</code> is never applied</td></tr>
+    <tr><td><b>call-by-name</b></td><td>the body runs first: <code class="hl2">!!42(loop())!!</code> is stuck</td></tr>
+  </table>
+  <div style="margin-top: 3%;">
+  <b>A term certifies the type only once it is a value.</b>
+  <span class="gloss">the calculus has no general recursion; DOT and Scala rest on the same principle</span>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Intersection Types</h2>
+  <div style="margin-top: 2%;">
+  <b>Under an intersection of arrows, the two projections can come from different arrows.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%;">
+  $F := (\TInt \to \TInt) \wedge (\TBool \to \TBool) \qquad \TBool &lt;: \cTDom{F} \qquad \cTRange{F} &lt;: \TInt$
+  </div>
+  <div class="centering gloss" style="margin-top: .6em;">the identity inhabits F, yet the rule types f(true) at Int</div>
+  <div style="margin-top: 3%;">
+  <b>A limitation: the argument witnesses the domain, not which arrow gives the result.</b>
+  <span class="gloss">so overloading as intersection is out of scope; TypeScript's utility types pick the last overload; set-theoretic types suggest a projection F ∘ S that keeps the correlation</span>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Type Parameters and Type Members</h2>
+  <div style="margin-top: 2%;">
+  <b>Scala selects a type member through a term: <code class="hl2">f.Arg</code> needs <code class="hl2">f</code> in scope.</b>
+  </div>
+  <pre style="margin-top: 3%;"><code class="language-scala" data-trim>
+  trait Fn { type Arg; type Res; def apply(x: Arg): Res }
+  def eta(f: Fn)(x: f.Arg): f.Res = f.apply(x)           // ok
+  def eta2[F &lt;: Fn](f: F)(x: F#Arg): F#Res = f.apply(x)  // !!error!!
+  </code></pre>
+  <div style="margin-top: 1.5%;">
+  <span class="gloss" style="margin-top: 0;">projection <code class="hl2">F#Arg</code> on an abstract <code class="hl2">F</code> was dropped as unsound (bad bounds, dotty issue 1050)</span>
+  </div>
+  <div style="margin-top: 3%;">
+  <b>$\cTDom{F}$ projects a type, not a term: it is common to every function of type $F$.</b>
+  </div>
+  <div style="margin-top: 2%;">
+  <b>A term is still needed, but only at the call: the argument.</b>
+  <span class="gloss">Dotty tried to encode type parameters as type members (Odersky et al., SCALA'16)</span>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: map with One Type Variable</h2>
+  <div style="margin-top: 2%;">
+  <b>Projections are ordinary types, so they nest: one type variable types $\textit{map}$.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%; color: #999;">
+  $\textit{map} \;:\; \forall A, B.\ (A \to B) \to \TList{A} \to \TList{B}$
+  </div>
+  <div class="disp" style="margin-top: 1.5%;">
+  $\textit{map} \;:\; \forall F &lt;: \TTop.\ F \to \TList{\cTDom{F}} \to \TList{\cTRange{F}}$
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div class="disp" style="margin-top: 4%; font-size: 105%;">
+  $\textit{map} \;:=\; \Lambda F.\ \lambda f.\ \lambda \ell.\ \Lambda R.\ \lambda c.\ \lambda n.\ \ell\,[R]\,(\lambda x : \cTDom{F}.\ \lambda a.\ c\,(\chl{f(x)})\,(a))\,(n)$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>Only $\chl{f(x)}$ uses the proposed rule; every other call has an arrow type.</b>
+  <span class="gloss">Church-encoded lists, List A := &forall;R. (A &rarr; R &rarr; R) &rarr; R &rarr; R; at F := A &rarr; B, callers see the classic map</span>
+  </div>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Type Destructors and the Cast Back</h2>
+  <div style="margin-top: 2%;">
+  <b>Type destructors follow the same idea: η-equivalence recovers the components.</b>
+  </div>
+  <div class="disp" style="margin-top: 2%;">
+  $X \;\equiv_\eta\; X.1 \times X.2 \qquad \text{for } X &lt;: \TTop \times \TTop$
+  </div>
+  <div class="centering gloss" style="margin-top: .4em;">proposed by Hofmann and Pierce (I&amp;C 2002), who give no destructors for arrows</div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 2.5%;">
+  <b>TypeScript code wants the same for functions: it casts the wrapper back to <code class="hl2">T</code>.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  function logDecorator&lt;T extends (...args: any) =&gt; any&gt;(fn: T): T {
+    return ((...args: Parameters&lt;T&gt;): ReturnType&lt;T&gt; =&gt; {
+      [p[console.log("calling with", ...args);]]
+      return fn(...args);
+    }) [h[as T]];
+  }
+  </code></pre>
+  </div>
+  <div class="fragment" data-fragment-index="2">
+  <div style="margin-top: 2.5%;">
+  <b>However, the cast is unsound once a function type describes more than its calls.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  const taggedInc = Object.assign((x: number) =&gt; x + 1, { tag: "inc" });
+  logDecorator(taggedInc)[h[.tag]].toUpperCase()   // type-checks, !!throws at run time!!
+  </code></pre>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Products and Type Destructors</h2>
+  <div class="disp" style="margin-top: 2%;">
+  $\textit{mix} := \Lambda X &lt;: \TTop \times \TTop.\ \lambda x : X.\ \lambda y : X.\ (x.1,\ y.2)$
+  </div>
+  <table class="goal-list laws" style="margin-top: 2.5%; font-size: 100%;">
+    <tr><td>destructors</td><td>$\forall X &lt;: \TTop \times \TTop.\ X \to X \to X$, by $X \equiv X.1 \times X.2$</td></tr>
+    <tr><td>projections</td><td>$\forall X &lt;: \TTop \times \TTop.\ X \to X \to \TFst{X} \times \TSnd{X}$</td></tr>
+  </table>
+  <div style="margin-top: 3%;">
+  <b>Same precision; we cast no type, so the result is written out.</b>
+  </div>
+  <div class="disp" style="margin-top: 2.5%; font-size: 100%;">
+  $\textit{mapFst}_1 : \forall F &lt;: \TTop.\ \forall B.\ F \to \cTDom{F} \times B \to \cTRange{F} \times B$
+  </div>
+  <div class="disp" style="margin-top: 1%; font-size: 100%;">
+  $\textit{mapFst}_2 : \forall T &lt;: \TTop \times \TTop.\ \forall A'.\ (\TFst{T} \to A') \to T \to A' \times \TSnd{T}$
+  </div>
+  <div style="margin-top: 2.5%;">
+  <b>Each signature exposes only the structure it needs.</b>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: How the Utility Types Are Used</h2>
+  <table class="goal-list fixed" style="margin-top: 2%; font-size: 100%;">
+    <tr><td style="width: 15%;"><b>Concrete</b></td><td>76% of ReturnType and 54% of Parameters snippets project a <code class="hl2">typeof</code>; no <code class="hl2">any</code> needed</td></tr>
+    <tr><td><b>Abstract</b></td><td>Rocket.Chat: 40 generic declarations; 34 bound by <code class="hl2">any</code>, 3 by a sound arrow, 3 by nothing</td></tr>
+    <tr><td><b>Sound</b></td><td>29 of the 40; 13 of them TypeScript accepts only through <code class="hl2">any</code></td></tr>
+    <tr><td><b>Unsound</b></td><td>10 of the 40, among them 4 casts back to the function type</td></tr>
+  </table>
+  <div style="margin-top: 3%;">
+  <b>The decorators that need <code class="hl2">any</code> are what our rule types soundly.</b>
+  <span class="gloss">100 most-starred TypeScript repositories, March 2026; Rocket.Chat at commit 541804a, October 2026</span>
+  </div>
+</section>
+
+<section data-visibility="uncounted">
+  <h2>Backup: Image Types</h2>
+  <div style="margin-top: 2%;">
+  <b>The image $\cTImg{F}{X}$ types the results of an $F$ on arguments of type $X$.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%;">
+  $\inferfrac{f : F \qquad x : X \qquad X &lt;: \cTDom{F}}{f(x) : \cTImg{F}{X}}$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>The result type depends on the argument's type, so overloads keep their correlation.</b>
+  <span class="gloss">ongoing work: the image is a bounded type operator in $\mathsf{F}_{\omega&lt;:}$, with $\TRange{F} := F \mathbin{@} \TDom{F}$</span>
+  </div>
+</section>

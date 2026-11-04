@@ -1,0 +1,150 @@
+
+<section>
+  <h2>Higher-Order Functions</h2>
+  <div style="margin-top: 2%;">
+  <b>A higher-order function can take a function as input, or return one as output.</b>
+  </div>
+  <div>
+  <div style="margin-top: 3%;">
+  <b>For example, a decorator adds logging to any function.</b>
+  </div>
+  <pre style="margin-top: 3%;"><code class="language-javascript" data-trim>
+  function logDecorator([h[fn]]) {
+    return (x) =&gt; {
+      [p[console.log("calling with", x);]]
+      return [h[fn(x)]];
+    };
+  }
+  const add1 = (x) =&gt; x + 1;
+  logDecorator(add1)(41)   // prints "calling with 41", returns 42
+  </code></pre>
+  <div style="margin-top: 3%;">
+  <b>The decorator has a function parameter <code class="hl2">[h[fn]]</code>, and calls it as <code class="hl2">[h[fn(x)]]</code>.</b>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Parametric Polymorphism</h2>
+  <div style="margin-top: 2%;">
+  <b>In TypeScript, we want one signature that works with all functions.</b>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>Parametric polymorphism gives it type parameters for the input and output of <code class="hl2">fn</code>.</b>
+  <span class="gloss">generics in TypeScript; &Lambda; and &forall; in System F</span>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  function logDecorator[h[&lt;A, B&gt;]](fn: [h[(x: A) =&gt; B]]): [h[(x: A) =&gt; B]] {
+    return (x) =&gt; {
+      [p[console.log("calling with", x);]]
+      return fn(x);
+    };
+  }
+  </code></pre>
+  </div>
+</section>
+
+<section>
+  <h2>Bounded Quantification</h2>
+  <div style="margin-top: 2%;">
+  <b>However, the signature is heavyweight: two type parameters per function.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  function subscribe[h[&lt;A, B, C, D&gt;]](next: [h[(x: A) =&gt; B]], error: [h[(e: C) =&gt; D]]) { .. }
+  </code></pre>
+  <div class="gloss" style="margin-top: .6em;">in languages with higher-rank polymorphism, users write type parameters explicitly</div>
+  <div style="margin-top: 4%;">
+  <b>Can we use just one type variable per function?</b>
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 4%;">
+  <b>Bounded quantification lets a type variable accept every subtype of a bound.</b>
+  <span class="gloss">bounded generics in TypeScript; &forall;X &lt;: T in System F<sub>&lt;:</sub></span>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  type Fn = (...args: never) =&gt; unknown;   // every function type extends it
+  function logDecorator[h[&lt;T extends Fn&gt;]](fn: [h[T]]) { .. }
+  </code></pre>
+  </div>
+</section>
+
+<section>
+  <h2>The Decorated Function Loses Its Type</h2>
+  <div style="margin-top: 2%;">
+  <b>However, the body observes <code class="hl2">fn</code> only at the precision of the bound.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  function logDecorator&lt;T extends (...args: never) =&gt; unknown&gt;(fn: T) {
+    return (...args: [h[never]]): [h[unknown]] =&gt; {
+      [p[console.log("calling with", args);]]
+      return fn(...args);
+    };
+  }
+  </code></pre>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 4%;">
+  <b>So every decorated function must take <code class="hl2">never</code> and return <code class="hl2">unknown</code>.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  const inc = logDecorator((x: number) =&gt; x + 1);   //: (...args: [h[never]]) =&gt; [h[unknown]]
+  inc(41)   // !!error:!! [number] is not assignable to never
+  </code></pre>
+  </div>
+</section>
+
+<section>
+  <h2>Early Exposure Loses Precision</h2>
+  <div style="margin-top: 2%;">
+  <b>The decorator's minimal form is an η-expansion.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%;">
+  $\textit{eta} \;:=\; \Lambda F &lt;: \TBot \to \TTop.\ \lambda f : F.\ \lambda x : \chl{?}.\ f(x)$
+  </div>
+  <div class="centering gloss" style="margin-top: .6em;">
+  <code class="hl2">never</code> and <code class="hl2">unknown</code> are $\TBot$ and $\TTop$
+  </div>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>The only arrow type known for $f$ is $\TBot \to \TTop$, so $x$ must be typed as $\TBot$.</b>
+  </div>
+  <div class="disp" style="margin-top: 3%;">
+  $\inferfrac{\inferfrac{f : F \qquad F &lt;: \TBot \to \TTop}{f : \chl{\TBot \to \TTop}}\ \rulefmt{T-Sub} \qquad x : \chl{\TBot}}{f(x) : \chl{\TTop}}\ \rulefmt{T-App}$
+  </div>
+  <div style="margin-top: 3%;">
+  <b>To apply $f$, its arrow type must be exposed at the definition, which loses precision.</b>
+  </div>
+  <div style="margin-top: 2%;">
+  <b>So this is a fundamental problem for bounded quantification.</b>
+  </div>
+  </div>
+</section>
+
+<section>
+  <h2>Utility Types Recover Precision</h2>
+  <div style="margin-top: 2%;">
+  <b>To recover precision, TypeScript's utility types read the input and output off <code class="hl2">T</code>.</b>
+  <span class="gloss">ReturnType appears in 88, Parameters in 82 of the 100 most-starred TypeScript repositories</span>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  function logDecorator&lt;T extends (...args: [h[any]]) =&gt; [h[any]]&gt;(fn: T) {
+    return (...args: [h[Parameters&lt;T&gt;]]): [h[ReturnType&lt;T&gt;]] =&gt; {
+      [p[console.log("calling with", ...args);]]
+      return fn(...args);
+    };
+  }
+  </code></pre>
+  <div class="fragment" data-fragment-index="1">
+  <div style="margin-top: 3%;">
+  <b>The decorator must rely on <code class="hl2">[h[any]]</code>: an unsafe type that bypasses every check on <code class="hl2">fn</code>.</b>
+  </div>
+  <div style="margin-top: 2.5%;">
+  <b>With a sound bound, <code class="hl2">never</code> to <code class="hl2">unknown</code>, its body is rejected.</b>
+  </div>
+  <pre style="margin-top: 2%;"><code class="language-typescript" data-trim>
+  // !!error:!! Parameters&lt;T&gt; is not assignable to never
+  // !!error:!! unknown is not assignable to ReturnType&lt;T&gt;
+  </code></pre>
+  </div>
+</section>
+
